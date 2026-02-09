@@ -9,7 +9,7 @@ import { PointRanking } from './components/PointRanking';
 
 export function HomePage() {
     return (
-        <main className="min-h-screen bg-slate-50 pt-20 md:pt-24 pb-16">
+        <main className="min-h-screen bg-slate-50 pt-24 md:pt-24 pb-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <HeroSection />
                 <div className="grid grid-cols-12 gap-4 md:gap-6">
