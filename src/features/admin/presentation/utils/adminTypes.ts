@@ -1,5 +1,7 @@
-export type Role = 'USER' | 'MEMBER' | 'ADMIN';
-export type Status = 'PENDING' | 'ACTIVE' | 'BANNED';
+import type { UserRole, UserStatus } from '@/shared/types/enums';
+
+export type Role = UserRole;
+export type Status = UserStatus;
 
 export interface User {
     userId: number;
