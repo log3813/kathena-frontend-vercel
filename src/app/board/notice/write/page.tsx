@@ -121,4 +121,4 @@ export default function NoticeWritePage() {
       </div>
     </main>
   );
-}git add .
+}
