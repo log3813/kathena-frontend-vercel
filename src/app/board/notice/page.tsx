@@ -1,88 +1,70 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+import Link from 'next/link'; // 👈 Link import 필수!
 import { Pagination } from '@/shared/components/ui/Pagination';
 
 // 가짜 데이터
-const MOCK_NOTICES = Array.from({ length: 10 }).map((_, i) => ({
-  id: i + 1,
-  title: i < 2 ? `[공지] 공지사항 내용을 확인해주세요` : `일반 공지사항 테스트 글 ${i + 1}`,
-  author: i < 2 ? '회장' : '서기',
-  date: '2026. 2. 14.',
-  viewCount: 11 + i * 5,
-  isPinned: i < 2, 
-}));
+const MOCK_NOTICES = [
+  { id: 1, title: '[필독] 2026학년도 KATHENA 신입 부원 모집 안내', author: '관리자', date: '2026. 02. 01', viewCount: 1540 },
+  { id: 2, title: '동아리 방 이용 규칙 개정 안내 (26.02.10부터)', author: '관리자', date: '2026. 02. 05', viewCount: 820 },
+  { id: 3, title: '제 1회 카테나 롤 내전 대진표 공개', author: '운영진', date: '2026. 02. 12', viewCount: 450 },
+  { id: 4, title: '포인트 샵 신규 굿즈 입고 안내', author: '관리자', date: '2026. 02. 14', viewCount: 210 },
+  { id: 5, title: '2월 정기 총회 장소 변경 공지', author: '관리자', date: '2026. 02. 15', viewCount: 105 },
+];
 
-export default function NoticePage() {
+export default function NoticeBoardPage() {
   const [page, setPage] = useState(1);
 
   return (
-    <main className="container mx-auto px-4 py-8 text-black min-h-screen mt-20"> 
+    <main className="container mx-auto px-4 py-8 text-slate-800 min-h-screen mt-20">
       
+      {/* 상단 헤더 */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">공지사항</h1>
-        <p className="text-gray-500">동아리의 주요 소식을 확인하세요.</p>
+        <h1 className="text-3xl font-bold mb-2 text-slate-900">공지사항</h1>
+        <p className="text-slate-600">동아리의 중요한 소식을 전해드립니다.</p>
       </div>
 
-      {/* 테이블 */}
-      <div className="w-full overflow-hidden rounded-xl bg-[#0F172A] text-slate-200 shadow-lg">
+      {/* 테이블 영역 */}
+      <div className="w-full overflow-hidden rounded-xl bg-white shadow-sm border border-slate-200">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-slate-700/50 text-slate-400 text-sm">
-              <th className="py-4 px-6 font-medium w-24 text-center">번호</th>
+            <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 text-sm">
+              <th className="py-4 px-6 font-medium w-20 text-center">번호</th>
               <th className="py-4 px-6 font-medium">제목</th>
               <th className="py-4 px-6 font-medium w-32 text-center">작성자</th>
               <th className="py-4 px-6 font-medium w-32 text-center">작성일</th>
               <th className="py-4 px-6 font-medium w-24 text-center">조회수</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800">
-            {MOCK_NOTICES.slice((page - 1) * 10, page * 10).map((post) => (
-              <tr key={post.id} className="hover:bg-slate-800/50 transition-colors cursor-pointer text-sm">
-                
-                {/* 1. 번호 */}
-                <td className="py-4 px-6 text-center text-slate-500">
-                  {post.isPinned ? (
-                    <span className="bg-red-500 text-white px-2 py-1 rounded text-xs font-bold whitespace-nowrap inline-block">
-                      중요
-                    </span>
-                  ) : (
-                    post.id
-                  )}
-                </td>
-
-                {/* 2. 제목 */}
-                <td className="py-4 px-6 font-medium text-slate-100">
-                  {post.isPinned && <span className="text-red-400 mr-2">📢</span>}
-                  {post.title}
-                </td>
-
-                {/* 3. 작성자, 날짜, 조회수 */}
-                <td className="py-4 px-6 text-center text-slate-400">{post.author}</td>
-                <td className="py-4 px-6 text-center text-slate-500">{post.date}</td>
-                <td className="py-4 px-6 text-center text-slate-400">{post.viewCount}</td>
+          <tbody className="divide-y divide-slate-100">
+            {MOCK_NOTICES.map((notice) => (
+              <tr key={notice.id} className="hover:bg-slate-50 transition-colors cursor-pointer text-sm">
+                <td className="py-4 px-6 text-center text-slate-500 font-medium">{notice.id}</td>
+                <td className="py-4 px-6 font-medium text-slate-900">{notice.title}</td>
+                <td className="py-4 px-6 text-center text-slate-600">{notice.author}</td>
+                <td className="py-4 px-6 text-center text-slate-500">{notice.date}</td>
+                <td className="py-4 px-6 text-center text-slate-600">{notice.viewCount}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
+      {/* 👇 하단 페이지네이션 + 글쓰기 버튼 영역 */}
       <div className="relative mt-8 flex justify-center items-center">
-        <Pagination 
-          currentPage={page} 
-          totalPages={5} 
-          onPageChange={(newPage) => setPage(newPage)} 
-        />
-
+        <Pagination currentPage={page} totalPages={3} onPageChange={setPage} />
+        
+        {/* 글쓰기 버튼 추가됨! */}
         <Link 
           href="/board/notice/write"
-          className="absolute right-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition-colors text-sm flex items-center gap-2"
+          className="absolute right-0 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition-colors text-sm flex items-center gap-2 shadow-md hover:shadow-lg"
         >
           <span>글쓰기</span>
           <span>✏️</span>
         </Link>
       </div>
+
     </main>
   );
 }

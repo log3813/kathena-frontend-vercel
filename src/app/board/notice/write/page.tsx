@@ -10,14 +10,14 @@ export default function NoticeWritePage() {
   
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [isPinned, setIsPinned] = useState(false);
-  const [files, setFiles] = useState<File[]>([]); // 👈 파일 저장소
+  // const [isPinned, setIsPinned] = useState(false); // 👈 삭제됨
+  const [files, setFiles] = useState<File[]>([]); 
 
   // 파일 선택 핸들러
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
-      setFiles((prev) => [...prev, ...newFiles]); // 기존 파일에 추가
+      setFiles((prev) => [...prev, ...newFiles]); 
     }
   };
 
@@ -31,7 +31,8 @@ export default function NoticeWritePage() {
       alert('제목과 내용을 입력해주세요!');
       return;
     }
-    console.log('등록 데이터:', { title, content, isPinned, files });
+    // console.log에 isPinned 제거
+    console.log('등록 데이터:', { title, content, files });
     alert(`공지사항이 등록되었습니다! (첨부파일 ${files.length}개)`);
     router.push('/board/notice');
   };
@@ -71,7 +72,7 @@ export default function NoticeWritePage() {
             hidden 
             ref={fileInputRef} 
             onChange={handleFileChange}
-            accept="image/*,video/*,.pdf,.zip" // 허용 파일 형식
+            accept="image/*,video/*,.pdf,.zip" 
           />
           <p className="text-gray-500 text-lg">
             📂 <span className="font-bold text-blue-600">클릭</span>하여 파일을 추가하세요
@@ -99,20 +100,10 @@ export default function NoticeWritePage() {
         )}
       </div>
 
-      {/* 하단 버튼 영역 */}
-      <div className="flex justify-between items-center">
-        {/* 중요 공지 체크 */}
-        <label className="flex items-center gap-2 cursor-pointer bg-red-50 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors border border-red-100">
-          <input 
-            type="checkbox" 
-            checked={isPinned} 
-            onChange={(e) => setIsPinned(e.target.checked)}
-            className="w-5 h-5 accent-red-500" 
-          />
-          <span className="font-bold text-red-500">📢 중요 공지로 등록</span>
-        </label>
-
-        {/* 취소 / 등록 */}
+      {/* 하단 버튼 영역 (체크박스 제거 및 오른쪽 정렬) */}
+      <div className="flex justify-end items-center">
+        
+        {/* 취소 / 등록 버튼 */}
         <div className="flex gap-4">
           <button
             onClick={() => router.back()}
