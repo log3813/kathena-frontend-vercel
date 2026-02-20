@@ -1,71 +1,26 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import type { User, Role as RoleType } from '../utils/adminTypes';
+import type { UserRole } from '@/shared/types/enums';
+import { useRoleManagement } from '@/features/admin/application/hooks/useRoleManagement';
 
-type Role = RoleType;
-
-const DUMMY_USERS: User[] = [
-  { userId: 1, name: '신규유저', nickname: '뉴비1', role: 'USER', status: 'PENDING', signupDate: '2026-02-07' },
-  { userId: 2, name: '김카테나', nickname: '갓테나', role: 'ADMIN', status: 'ACTIVE', signupDate: '2025-12-01' },
-  { userId: 3, name: '이게이머', nickname: '게이머', role: 'MEMBER', status: 'ACTIVE', signupDate: '2026-01-15' },
-];
-
-export default function RoleManagement() {
-  const [users, setUsers] = useState<User[]>(DUMMY_USERS);
-  const [localError, setLocalError] = useState<string | null>(null);
-  const [loadingUserId, setLoadingUserId] = useState<number | null>(null);
-
-  const handleApprove = useCallback((id: number) => {
-    setLoadingUserId(id);
-    try {
-      setUsers(prev => prev.map(u => (u.userId === id ? { ...u, status: 'ACTIVE' } : u)));
-      setLocalError(null);
-    } catch (err) {
-      setLocalError('승인 처리 중 오류 발생');
-    } finally {
-      setLoadingUserId(null);
-    }
-  }, []);
-
-  const handleRoleChange = useCallback((id: number, role: Role) => {
-    setLoadingUserId(id);
-    try {
-      setUsers(prev => prev.map(u => (u.userId === id ? { ...u, role } : u)));
-      setLocalError(null);
-    } catch {
-      setLocalError('권한 변경 중 오류 발생');
-    } finally {
-      setLoadingUserId(null);
-    }
-  }, []);
-
-  const handleRemove = useCallback((id: number) => {
-    if (!confirm('정말 삭제하시겠습니까?')) return;
-    
-    setLoadingUserId(id);
-    try {
-      setUsers(prev => prev.filter(u => u.userId !== id));
-      setLocalError(null);
-    } catch {
-      setLocalError('삭제 중 오류 발생');
-    } finally {
-      setLoadingUserId(null);
-    }
-  }, []);
-
-  const stats = {
-    pending: users.filter(u => u.status === 'PENDING').length,
-    members: users.filter(u => u.role === 'MEMBER').length,
-    total: users.length,
-  };
+export function RoleManagement() {
+  const {
+    users,
+    error,
+    loadingUserId,
+    stats,
+    handleApprove,
+    handleRoleChange,
+    handleRemove,
+    clearError,
+  } = useRoleManagement();
 
   return (
     <div className="space-y-6">
-      {localError && (
+      {error && (
         <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-sm text-rose-600 font-bold flex justify-between items-center">
-          ⚠️ {localError}
-          <button onClick={() => setLocalError(null)} className="text-lg">✕</button>
+          ⚠️ {error}
+          <button onClick={clearError} className="text-lg cursor-pointer hover:opacity-70 transition-opacity">✕</button>
         </div>
       )}
 
@@ -98,15 +53,15 @@ export default function RoleManagement() {
           </thead>
           <tbody className="divide-y divide-slate-50">
             {users.map((user) => (
-              <tr 
-                key={user.userId} 
+              <tr
+                key={user.userId}
                 className="hover:bg-slate-50/50 transition-colors"
                 onDoubleClick={() => user.status === 'PENDING' && handleApprove(user.userId)}
               >
                 <td className="p-4">
                   <div className="text-sm font-bold text-slate-900">{user.name}</div>
                   <div className="text-xs text-slate-500">
-                    @{user.nickname} · {user.signupDate}
+                    @{user.nickname} · {user.createdAt ?? user.signupDate}
                   </div>
                 </td>
                 <td className="p-4 text-center">
@@ -115,9 +70,13 @@ export default function RoleManagement() {
                       ? 'bg-amber-100 text-amber-600'
                       : user.status === 'ACTIVE'
                       ? 'bg-emerald-100 text-emerald-600'
-                      : 'bg-rose-100 text-rose-600'
+                      : user.status === 'SUSPENDED'
+                      ? 'bg-rose-100 text-rose-600'
+                      : user.status === 'REJECTED'
+                      ? 'bg-rose-100 text-rose-600'
+                      : 'bg-slate-100 text-slate-600'
                   }`}>
-                    {user.status === 'PENDING' ? '대기' : user.status === 'ACTIVE' ? '활성' : '금지'}
+                    {user.status === 'PENDING' ? '대기' : user.status === 'ACTIVE' ? '활성' : user.status === 'SUSPENDED' ? '정지' : user.status === 'REJECTED' ? '거절' : '일시 중지'}
                   </span>
                 </td>
                 <td className="p-4">
@@ -125,7 +84,7 @@ export default function RoleManagement() {
                     value={user.role ?? 'USER'}
                     aria-label={`${user.name} 권한 설정`}
                     disabled={user.status === 'PENDING' || loadingUserId === user.userId}
-                    onChange={(e) => handleRoleChange(user.userId, e.target.value as Role)}
+                    onChange={(e) => handleRoleChange(user.userId, e.target.value as UserRole)}
                     className="bg-slate-50 border border-slate-200 text-xs font-bold rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-blue-500/10 disabled:opacity-50 cursor-pointer"
                   >
                     <option value="USER">USER</option>
@@ -140,19 +99,19 @@ export default function RoleManagement() {
                         onClick={() => handleApprove(user.userId)}
                         disabled={loadingUserId === user.userId}
                         title="더블클릭으로도 승인 가능"
-                        className="px-3 py-1.5 bg-blue-600 text-white text-[11px] font-bold rounded-lg hover:bg-blue-700 shadow-md shadow-blue-100 disabled:opacity-50 transition-all"
+                        className="px-3 py-1.5 bg-blue-600 text-white text-[11px] font-bold rounded-lg hover:bg-blue-700 shadow-md shadow-blue-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-all"
                       >
                         {loadingUserId === user.userId ? '처리중...' : '가입 승인'}
                       </button>
                     ) : (
-                      <button className="px-3 py-1.5 border border-slate-200 text-slate-600 text-[11px] font-bold rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50">
+                      <button className="px-3 py-1.5 border border-slate-200 text-slate-600 text-[11px] font-bold rounded-lg cursor-pointer hover:bg-slate-50 transition-colors disabled:opacity-50">
                         정보 수정
                       </button>
                     )}
                     <button
                       onClick={() => handleRemove(user.userId)}
                       disabled={loadingUserId === user.userId}
-                      className="px-3 py-1.5 bg-rose-50 text-rose-600 text-[11px] font-bold rounded-lg hover:bg-rose-100 transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 bg-rose-50 text-rose-600 text-[11px] font-bold rounded-lg hover:bg-rose-100 disabled:cursor-not-allowed cursor-pointer transition-colors disabled:opacity-50"
                     >
                       {loadingUserId === user.userId ? '처리중...' : user.status === 'PENDING' ? '거절' : '강퇴'}
                     </button>
