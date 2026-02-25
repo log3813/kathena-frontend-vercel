@@ -1,4 +1,7 @@
+"use client";
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Pagination } from '@/shared/components/ui/Pagination';
 
 const MOCK_NOTICES = [
@@ -9,6 +12,8 @@ const MOCK_NOTICES = [
 ];
 
 export function NoticeList() {
+  const router = useRouter();
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-end">
@@ -29,11 +34,13 @@ export function NoticeList() {
           </thead>
           <tbody>
             {MOCK_NOTICES.map((notice) => (
-              <tr key={notice.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4">
-                  <Link href={`/board/notice/${notice.id}`} className="text-slate-900 font-medium hover:text-blue-600">
-                    {notice.title}
-                  </Link>
+              <tr 
+                key={notice.id} 
+                onClick={() => router.push(`/board/notice/${notice.id}`)}
+                className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                <td className="px-6 py-4 text-slate-900 font-medium hover:text-blue-600">
+                  {notice.title}
                 </td>
                 <td className="px-6 py-4 text-slate-600">{notice.author}</td>
                 <td className="px-6 py-4 text-slate-500">{notice.date}</td>

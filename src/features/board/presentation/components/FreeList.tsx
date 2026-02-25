@@ -1,4 +1,7 @@
+"use client";
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Pagination } from '@/shared/components/ui/Pagination';
 
 const MOCK_POSTS = [
@@ -9,6 +12,8 @@ const MOCK_POSTS = [
 ];
 
 export function FreeList() {
+  const router = useRouter();
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-end">
@@ -29,11 +34,13 @@ export function FreeList() {
           </thead>
           <tbody>
             {MOCK_POSTS.map((post) => (
-              <tr key={post.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4">
-                  <Link href={`/board/free/${post.id}`} className="text-slate-900 font-medium hover:text-blue-600">
-                    {post.title}
-                  </Link>
+              <tr 
+                key={post.id}
+                onClick={() => router.push(`/board/free/${post.id}`)}
+                className="border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                <td className="px-6 py-4 text-slate-900 font-medium hover:text-blue-600">
+                  {post.title}
                 </td>
                 <td className="px-6 py-4 text-slate-600">{post.author}</td>
                 <td className="px-6 py-4 text-slate-500">{post.date}</td>
